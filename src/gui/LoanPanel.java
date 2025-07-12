@@ -12,7 +12,7 @@ import ds.LoanPriorityQueue;
 
 public class LoanPanel extends JFrame {
     private JTextField accField, amountField, creditScoreField;
-    private JButton requestBtn, viewBtn, approveBtn, rejectBtn, backBtn;
+    private JButton requestBtn, viewBtn, approveBtn, rejectBtn, viewStatusBtn, backBtn;
     private JTextArea outputArea;
 
     private CustomerMap customerMap = CustomerMap.getInstance();
@@ -46,12 +46,14 @@ public class LoanPanel extends JFrame {
         viewBtn = new JButton("View Pending Loans");
         approveBtn = new JButton("Approve Top Loan");
         rejectBtn = new JButton("Reject Top Loan");
+        viewStatusBtn = new JButton("View Loan Status");
         backBtn = new JButton("Back");
 
         JPanel controlPanel = new JPanel();
         controlPanel.add(viewBtn);
         controlPanel.add(approveBtn);
         controlPanel.add(rejectBtn);
+        controlPanel.add(viewStatusBtn);
         controlPanel.add(backBtn);
 
         outputArea = new JTextArea(10, 50);
@@ -66,6 +68,7 @@ public class LoanPanel extends JFrame {
         viewBtn.addActionListener(e -> viewLoans());
         approveBtn.addActionListener(e -> approveLoan());
         rejectBtn.addActionListener(e -> rejectLoan());
+        viewStatusBtn.addActionListener(e -> viewLoanStatus());
         backBtn.addActionListener(e -> {
             dispose();
             new Dashboard();
@@ -103,8 +106,9 @@ public class LoanPanel extends JFrame {
 
             LoanRequest request = new LoanRequest(loanId, acc, amount, creditScore);
             loanQueue.addLoanRequest(request);
+            customer.addLoanRequest(request);  
             outputArea.setText("Loan request submitted successfully.");
-            ActivityLogList.getInstance().addLog("Loan Request of ₹" + amount + " submitted by Account: " + acc);
+            ActivityLogList.getInstance().addLog("Loan Request (Loan ID: " + loanId + ") of ₹" + amount + " submitted by Account No: " + acc);
         } catch (NumberFormatException e) {
             outputArea.setText("Invalid amount or credit score.");
         }
@@ -117,9 +121,21 @@ public class LoanPanel extends JFrame {
 
     private void approveLoan() {
         LoanRequest request = loanQueue.pollLoanRequest();
+        request.setStatus("Approved");
+
+        Customer customer = customerMap.getCustomer(request.getAccountNumber());
+        if (customer != null) {
+            for (LoanRequest lr : customer.getLoanHistory()) {
+                if (lr.getLoanId().equals(request.getLoanId())) {
+                    lr.setStatus("Approved");
+                    break;
+                }
+            }
+        }
+
         if (request != null) {
             outputArea.setText("Loan Approved:\n" + request);
-            ActivityLogList.getInstance().addLog("Loan ID: " + request.getLoanId() + " for Account: " + request.getAccountNumber() + " has been APPROVED by Admin");
+            ActivityLogList.getInstance().addLog("Loan ID: " + request.getLoanId() + " for Account No: " + request.getAccountNumber() + " has been APPROVED by Admin");
         } else {
             outputArea.setText("No pending loan requests.");
         }
@@ -127,11 +143,46 @@ public class LoanPanel extends JFrame {
 
     private void rejectLoan() {
         LoanRequest request = loanQueue.pollLoanRequest();
+        request.setStatus("Rejected");
+
+        Customer customer = customerMap.getCustomer(request.getAccountNumber());
+        if (customer != null) {
+            for (LoanRequest lr : customer.getLoanHistory()) {
+                if (lr.getLoanId().equals(request.getLoanId())) {
+                    lr.setStatus("Rejected");
+                    break;
+                }
+            }
+        }
+
         if (request != null) {
             outputArea.setText("Loan Rejected:\n" + request);
-            ActivityLogList.getInstance().addLog("Loan ID: " + request.getLoanId() + " for Account: " + request.getAccountNumber() + " has been REJECTED by Admin");
+            ActivityLogList.getInstance().addLog("Loan ID: " + request.getLoanId() + " for Account No: " + request.getAccountNumber() + " has been REJECTED by Admin");
         } else {
             outputArea.setText("No pending loan requests.");
+        }
+    }
+
+    private void viewLoanStatus() {
+        String acc = accField.getText().trim();
+        if (acc.isEmpty()) {
+            outputArea.setText("Please enter an Account Number.");
+            return;
+        }
+
+        Customer customer = customerMap.getCustomer(acc);
+        if (customer == null) {
+            outputArea.setText("Customer not found.");
+            return;
+        }
+
+        if (customer.getLoanHistory().isEmpty()) {
+            outputArea.setText("No loan history found for this account.");
+        } else {
+            outputArea.setText("Loan History for Account No: " + acc + "\n\n");
+            for (LoanRequest request : customer.getLoanHistory()) {
+                outputArea.append("- " + request.toString() + "\n");
+            }
         }
     }
 }

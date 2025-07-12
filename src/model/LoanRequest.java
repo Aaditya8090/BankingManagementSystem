@@ -5,12 +5,14 @@ public class LoanRequest implements Comparable<LoanRequest> {
     private String accountNumber;
     private double amount;
     private int creditScore;
+    private String status;
 
     public LoanRequest(String loanId, String accountNumber, double amount, int creditScore) {
         this.loanId = loanId;
         this.accountNumber = accountNumber;
         this.amount = amount;
         this.creditScore = creditScore;
+        this.status = "Pending"; // Default
     }
 
     public String getLoanId() {
@@ -25,6 +27,14 @@ public class LoanRequest implements Comparable<LoanRequest> {
         return accountNumber;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public int compareTo(LoanRequest other) {
         // Higher credit score = higher priority
@@ -33,6 +43,6 @@ public class LoanRequest implements Comparable<LoanRequest> {
 
     @Override
     public String toString() {
-        return "Account: " + accountNumber + ", Amount: ₹" + amount + ", Credit Score: " + creditScore;
+        return "Loan ID: " + loanId +", Account No: " + accountNumber + ", Amount: ₹" + amount + ", Credit Score: " + creditScore + ", Status: " + status;
     }
 }

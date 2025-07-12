@@ -1,11 +1,15 @@
 package model;
 
+import java.util.ArrayList;
+import java.util.List;
+import model.LoanRequest;
 import util.IDGenerator;
 
 public class Customer {
     private String accountNumber;
     private String name;
     private double balance;
+    private List<LoanRequest> loanHistory = new ArrayList<>();
 
     public Customer(String name, double balance) {
         this.accountNumber = IDGenerator.generateAccountNumber();
@@ -35,6 +39,14 @@ public class Customer {
             return true;
         }
         return false;
+    }
+
+    public void addLoanRequest(LoanRequest request) {
+        loanHistory.add(request);
+    }
+
+    public List<LoanRequest> getLoanHistory() {
+        return loanHistory;
     }
 
     @Override

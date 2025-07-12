@@ -71,7 +71,6 @@ public class CustomerPanel extends JFrame {
 
     private void addCustomer() {
         try {
-            // String account = accountField.getText().trim();
             String name = nameField.getText().trim();
             double balance = Double.parseDouble(balanceField.getText().trim());
 
@@ -96,6 +95,15 @@ public class CustomerPanel extends JFrame {
         Customer customer = customerMap.getCustomer(account);
         if (customer != null) {
             outputArea.setText("Customer Found:\n" + customer);
+
+            if (!customer.getLoanHistory().isEmpty()) {
+                outputArea.append("\n\nLoan History:\n");
+                for (model.LoanRequest lr : customer.getLoanHistory()) {
+                    outputArea.append("- " + lr.toString() + "\n");
+                }
+            } else {
+                outputArea.append("\n\nNo loan history available.");
+            }
         } else {
             outputArea.setText("Customer not found.");
         }

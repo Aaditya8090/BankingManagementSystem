@@ -92,14 +92,14 @@ public class TransactionPanel extends JFrame {
             if (isDeposit) {
                 customer.deposit(amount);
                 success = true;
-                ActivityLogList.getInstance().addLog("Deposit of ₹" + amount + " to Account: " + acc);
+                ActivityLogList.getInstance().addLog("Deposit of ₹" + amount + " to Account No: " + acc);
             } else {
                 success = customer.withdraw(amount);
                 if (!success) {
                     outputArea.setText("Insufficient balance.");
                     return;
                 }
-                ActivityLogList.getInstance().addLog("Withdrawal of ₹" + amount + " from Account: " + acc);
+                ActivityLogList.getInstance().addLog("Withdrawl of ₹" + amount + " from Account No: " + acc);
             }
 
             String type = isDeposit ? "Deposit" : "Withdraw";
